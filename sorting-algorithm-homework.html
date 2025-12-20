@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การบ้าน Sorting Algorithm</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+        }
+        
+        body {
+            font-family: 'Chakra Petch', 'Press Start 2P', monospace;
+            background: #0a0e0a;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Pixel Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Scanline Effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.02) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+            z-index: 2;
+        }
+        
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #0f1e0f;
+            border: 4px solid #00ff00;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.5),
+                inset 0 0 30px rgba(0, 255, 0, 0.1);
+            padding: 30px;
+            position: relative;
+            z-index: 3;
+            animation: glitchBorder 3s infinite;
+        }
+        
+        @keyframes glitchBorder {
+            0%, 100% { border-color: #00ff00; }
+            50% { border-color: #00cc00; }
+        }
+        
+        /* Pixel corners */
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+        .container::before {
+            top: -2px;
+            left: -2px;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 50%, 50% 100%, 0 100%);
+        }
+        .container::after {
+            bottom: -2px;
+            right: -2px;
+            clip-path: polygon(50% 0, 100% 0, 100% 100%, 0 100%, 0 50%, 50% 50%);
+        }
+        
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: clamp(1.2em, 4vw, 2em);
+            font-weight: 700;
+            text-shadow: 
+                0 0 10px rgba(0, 255, 0, 0.8),
+                2px 2px 0px #003300;
+            animation: glitch 5s infinite;
+            letter-spacing: 2px;
+            line-height: 1.4;
+        }
+        
+        @keyframes glitch {
+            0%, 90%, 100% { 
+                transform: translate(0); 
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.8), 2px 2px 0px #003300;
+            }
+            91% { 
+                transform: translate(-2px, 2px); 
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 2px 2px 0px #330000;
+            }
+            93% { 
+                transform: translate(2px, -2px); 
+                text-shadow: 0 0 10px rgba(0, 0, 255, 0.8), 2px 2px 0px #000033;
+            }
+            95% { 
+                transform: translate(0); 
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.8), 2px 2px 0px #003300;
+            }
+        }
+        
+        .code-section {
+            background: #000000;
+            color: #00ff00;
+            padding: 20px;
+            border: 3px solid #00ff00;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 0, 0.5),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            font-size: clamp(0.5em, 2vw, 0.7em);
+            line-height: 1.8;
+            position: relative;
+        }
+        
+        .code-section::before {
+            content: '> โค้ดระบบ PYTHON CLASS';
+            position: absolute;
+            top: -15px;
+            left: 10px;
+            background: #0f1e0f;
+            padding: 0 10px;
+            color: #00ff00;
+            font-size: 0.7em;
+        }
+        
+        .code-section h2 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            font-size: clamp(0.8em, 2.5vw, 1.2em);
+        }
+        
+        .code-section pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+        
+        .keyword { color: #00ff88; text-shadow: 0 0 5px rgba(0, 255, 136, 0.5); }
+        .function { color: #00ffff; text-shadow: 0 0 5px rgba(0, 255, 255, 0.5); }
+        .string { color: #88ff00; }
+        .number { color: #ffff00; text-shadow: 0 0 5px rgba(255, 255, 0, 0.3); }
+        
+        .question-box {
+            background: #0a1a0a;
+            border: 3px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .question-box::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            pointer-events: none;
+        }
+        
+        .question-box:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .question-box h3 {
+            color: #00ff00;
+            font-size: clamp(0.7em, 2.5vw, 1em);
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            line-height: 1.5;
+        }
+        
+        .question-content {
+            color: #00cc00;
+            line-height: 2;
+            margin: 15px 0;
+            font-size: clamp(0.55em, 2vw, 0.75em);
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: #003300;
+            color: #00ff00;
+            border: 3px solid #00ff00;
+            cursor: pointer;
+            font-family: 'Chakra Petch', 'Press Start 2P', monospace;
+            font-size: clamp(0.5em, 2vw, 0.65em);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 0, 0.5),
+                inset 0 0 10px rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            line-height: 1.6;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 255, 0, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        
+        button:hover::before {
+            width: 200%;
+            height: 200%;
+        }
+        
+        button:hover {
+            background: #004400;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.8),
+                inset 0 0 20px rgba(0, 255, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .answer {
+            display: none;
+            background: #001100;
+            padding: 15px;
+            margin-top: 15px;
+            border: 2px solid #00ff00;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 0, 0.3),
+                inset 0 0 15px rgba(0, 255, 0, 0.1);
+            animation: pixelFadeIn 0.5s ease-out;
+        }
+        
+        @keyframes pixelFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .answer.show {
+            display: block;
+        }
+        
+        .stat {
+            background: #002200;
+            padding: 15px;
+            margin: 12px 0;
+            border-left: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: clamp(0.6em, 2.2vw, 0.8em);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            line-height: 2;
+        }
+        
+        .stat strong {
+            color: #00ffff;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+        
+        .details {
+            background: #000000;
+            padding: 15px;
+            margin: 12px 0;
+            border: 2px solid #00aa00;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.5em, 2vw, 0.7em);
+            max-height: 300px;
+            overflow-y: auto;
+            color: #00ff00;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
+            line-height: 2;
+            word-break: break-word;
+        }
+        
+        .details::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .details::-webkit-scrollbar-track {
+            background: #002200;
+        }
+        
+        .details::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+        
+        .details strong {
+            color: #00ffff;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+        
+        .compare { 
+            color: #00ffff;
+            text-shadow: 0 0 3px rgba(0, 255, 255, 0.5);
+        }
+        
+        .swap { 
+            color: #ffff00;
+            text-shadow: 0 0 3px rgba(255, 255, 0, 0.5);
+        }
+        
+        .algo-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #001a00;
+            border: 2px solid #00cc00;
+            box-shadow: 0 0 10px rgba(0, 204, 0, 0.3);
+        }
+        
+        .algo-section h4 {
+            color: #00ff00;
+            font-size: clamp(0.6em, 2.2vw, 0.85em);
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            line-height: 1.6;
+        }
+        
+        /* Loading Animation */
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0; }
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            body {
+                padding: 10px;
+            }
+            .code-section {
+                padding: 15px;
+                font-size: 0.55em;
+            }
+            button {
+                padding: 12px 20px;
+                font-size: 0.5em;
+                width: 100%;
+            }
+            .question-box {
+                padding: 15px;
+            }
+            .stat, .details {
+                padding: 12px;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .container {
+                padding: 50px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .code-section {
+                font-size: 0.75em;
+            }
+            button {
+                font-size: 0.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>█ HOMEWORK SORTING ALGORITHM █</h1>
+        
+        <div style="text-align: center; margin-bottom: 10px; color: #00ff00; font-size: clamp(0.5em, 2vw, 0.65em); line-height: 2;">
+            <div style="animation: blink 2s infinite;">⚡ จัดทำโดย: นายชิรณุพงศ์ แก้วประสิทธิ์ ⚡</div>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 25px;">
+            <button onclick="toggleCode()">
+                ▶ แสดง/ซ่อน โค้ด Python
+            </button>
+        </div>
+        
+        <div class="code-section" id="codeSection" style="display: none;">
+            <h2>// PYTHON CLASS</h2>
+            <pre><code><span class="keyword">import</span> random
+<span class="keyword">class</span> <span class="function">MyData</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, data):
+        self.__data = data
+    
+    <span class="keyword">def</span> <span class="function">getData</span>(self):
+        <span class="keyword">return</span> self.__data
+
+    <span class="keyword">def</span> <span class="function">setData</span>(self, data):
+        self.__data = data
+
+    <span class="keyword">def</span> <span class="function">randomData</span>(self, n):
+        self.__data = random.sample(range(<span class="number">1</span>, n+<span class="number">1</span>), n)
+
+    <span class="keyword">def</span> <span class="function">selectionSort</span>(self):
+        result = {
+            <span class="string">"Compare"</span>: [],
+            <span class="string">"Swap"</span>: [],
+            <span class="string">"Count_Compare"</span>: <span class="number">0</span>,
+            <span class="string">"Count_Swap"</span>: <span class="number">0</span>
+        }
+        arr = self.__data[:]
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(arr)):
+            idx = i
+            <span class="keyword">for</span> j <span class="keyword">in</span> range(i+<span class="number">1</span>, len(arr)):
+                result[<span class="string">"Count_Compare"</span>] += <span class="number">1</span>
+                result[<span class="string">"Compare"</span>].append((arr[j], arr[idx]))
+                <span class="keyword">if</span> arr[j] < arr[idx]:
+                    idx = j
+            result[<span class="string">"Count_Swap"</span>] += <span class="number">1</span>
+            result[<span class="string">"Swap"</span>].append((arr[i], arr[idx]))
+            x = arr[i]
+            arr[i] = arr[idx]
+            arr[idx] = x
+        <span class="keyword">return</span> result
+
+    <span class="keyword">def</span> <span class="function">insertionSort</span>(self):
+        result = {
+            <span class="string">"Compare"</span>: [],
+            <span class="string">"Swap"</span>: [],
+            <span class="string">"Count_Compare"</span>: <span class="number">0</span>,
+            <span class="string">"Count_Swap"</span>: <span class="number">0</span>
+        }
+        arr = self.__data[:]
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(arr)):
+            j = i
+            result[<span class="string">"Count_Compare"</span>] += <span class="number">1</span>
+            result[<span class="string">"Compare"</span>].append((arr[j], arr[j-<span class="number">1</span>]))
+            <span class="keyword">while</span> j != <span class="number">0</span> <span class="keyword">and</span> (arr[j] < arr[j-<span class="number">1</span>]):
+                result[<span class="string">"Count_Swap"</span>] += <span class="number">1</span>
+                result[<span class="string">"Swap"</span>].append((arr[j], arr[j-<span class="number">1</span>]))
+                arr[j], arr[j-<span class="number">1</span>] = arr[j-<span class="number">1</span>], arr[j]
+                j -= <span class="number">1</span>
+        <span class="keyword">return</span> result 
+    
+    <span class="keyword">def</span> <span class="function">bubbleSort</span>(self):
+        result = {
+            <span class="string">"Compare"</span>: [],
+            <span class="string">"Swap"</span>: [],
+            <span class="string">"Count_Compare"</span>: <span class="number">0</span>,
+            <span class="string">"Count_Swap"</span>: <span class="number">0</span>
+        }
+        dkub = self.__data[:]
+        n = len(dkub)
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(n-<span class="number">1</span>):
+            <span class="keyword">for</span> j <span class="keyword">in</span> range(n-<span class="number">1</span>):
+                result[<span class="string">"Count_Compare"</span>] += <span class="number">1</span>
+                result[<span class="string">"Compare"</span>].append((dkub[j], dkub[j+<span class="number">1</span>]))
+                <span class="keyword">if</span> dkub[j+<span class="number">1</span>] < dkub[j]:
+                    result[<span class="string">"Count_Swap"</span>] += <span class="number">1</span>
+                    result[<span class="string">"Swap"</span>].append((dkub[j], dkub[j+<span class="number">1</span>]))
+                    tmp = dkub[j]
+                    dkub[j] = dkub[j+<span class="number">1</span>]
+                    dkub[j+<span class="number">1</span>] = tmp
+        <span class="keyword">return</span> result</code></pre>
+        </div>
+
+        <!-- ข้อที่ 1 -->
+        <div class="question-box">
+            <h3>█ ข้อที่ 1 █</h3>
+            <p class="question-content">
+                > ข้อมูลเริ่มต้น: [1, 2, 3, 4, 5]<br>
+                > Algorithm: INSERTION SORT<br>
+                > มีการเปรียบเทียบข้อมูลกี่ครั้ง ระหว่างค่าอะไรบ้าง<br>
+                > มีการสลับที่ข้อมูลกี่ครั้ง ระหว่างค่าอะไรบ้าง
+            </p>
+            <button onclick="toggleAnswer(1)">▶ แสดงคำตอบ</button>
+            <div id="answer1" class="answer"></div>
+        </div>
+
+        <!-- ข้อที่ 2 -->
+        <div class="question-box">
+            <h3>█ ข้อที่ 2 █</h3>
+            <p class="question-content">
+                > ข้อมูลเริ่มต้น: [1, 2, 3, 4, 5]<br>
+                > Algorithm: BUBBLE SORT<br>
+                > มีการเปรียบเทียบข้อมูลกี่ครั้ง ระหว่างค่าอะไรบ้าง<br>
+                > มีการสลับที่ข้อมูลกี่ครั้ง ระหว่างค่าอะไรบ้าง
+            </p>
+            <button onclick="toggleAnswer(2)">▶ แสดงคำตอบ</button>
+            <div id="answer2" class="answer"></div>
+        </div>
+
+        <!-- ข้อที่ 3 -->
+        <div class="question-box">
+            <h3>█ ข้อที่ 3 █</h3>
+            <p class="question-content">
+                > ข้อมูลเริ่มต้น: [5, 4, 3, 2, 1]<br>
+                > Algorithm: ALL (SELECTION, INSERTION, BUBBLE)<br>
+                > มีการเปรียบเทียบข้อมูลกี่ครั้ง ระหว่างค่าอะไรบ้าง<br>
+                > มีการสลับที่ข้อมูลกี่ครั้ง ระหว่างค่าอะไรบ้าง
+            </p>
+            <button onclick="toggleAnswer(3)">▶ แสดงคำตอบ</button>
+            <div id="answer3" class="answer"></div>
+        </div>
+    </div>
+
+    <script>
+        class MyData {
+            constructor(data) {
+                this.__data = data;
+            }
+
+            getData() {
+                return this.__data;
+            }
+
+            setData(data) {
+                this.__data = data;
+            }
+
+            selectionSort() {
+                const result = {
+                    Compare: [],
+                    Swap: [],
+                    Count_Compare: 0,
+                    Count_Swap: 0
+                };
+                const arr = [...this.__data];
+                
+                for (let i = 0; i < arr.length; i++) {
+                    let idx = i;
+                    for (let j = i + 1; j < arr.length; j++) {
+                        result.Count_Compare++;
+                        result.Compare.push([arr[j], arr[idx]]);
+                        if (arr[j] < arr[idx]) {
+                            idx = j;
+                        }
+                    }
+                    result.Count_Swap++;
+                    result.Swap.push([arr[i], arr[idx]]);
+                    const x = arr[i];
+                    arr[i] = arr[idx];
+                    arr[idx] = x;
+                }
+                return result;
+            }
+
+            insertionSort() {
+                const result = {
+                    Compare: [],
+                    Swap: [],
+                    Count_Compare: 0,
+                    Count_Swap: 0
+                };
+                const arr = [...this.__data];
+                
+                for (let i = 0; i < arr.length; i++) {
+                    let j = i;
+                    result.Count_Compare++;
+                    // แสดงค่าจริงๆ ตามโค้ด Python รวมถึง arr[-1]
+                    const compareValue = j > 0 ? arr[j - 1] : arr[arr.length - 1];
+                    result.Compare.push([arr[j], compareValue]);
+                    while (j !== 0 && arr[j] < arr[j - 1]) {
+                        result.Count_Swap++;
+                        result.Swap.push([arr[j], arr[j - 1]]);
+                        [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]];
+                        j--;
+                    }
+                }
+                return result;
+            }
+
+            bubbleSort() {
+                const result = {
+                    Compare: [],
+                    Swap: [],
+                    Count_Compare: 0,
+                    Count_Swap: 0
+                };
+                const dkub = [...this.__data];
+                const n = dkub.length;
+                
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - 1; j++) {
+                        result.Count_Compare++;
+                        result.Compare.push([dkub[j], dkub[j + 1]]);
+                        if (dkub[j + 1] < dkub[j]) {
+                            result.Count_Swap++;
+                            result.Swap.push([dkub[j], dkub[j + 1]]);
+                            const tmp = dkub[j];
+                            dkub[j] = dkub[j + 1];
+                            dkub[j + 1] = tmp;
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        function formatArray(arr) {
+            if (arr.length === 0) return '[ NONE ]';
+            return arr.map(pair => '(' + pair.join(', ') + ')').join(', ');
+        }
+
+        function toggleCode() {
+            const codeSection = document.getElementById('codeSection');
+            if (codeSection.style.display === 'none') {
+                codeSection.style.display = 'block';
+            } else {
+                codeSection.style.display = 'none';
+            }
+        }
+
+        function toggleAnswer(num) {
+            const answer = document.getElementById('answer' + num);
+            
+            if (answer.classList.contains('show')) {
+                answer.classList.remove('show');
+                return;
+            }
+
+            let myData, result, html;
+
+            if (num === 1) {
+                myData = new MyData([1, 2, 3, 4, 5]);
+                result = myData.insertionSort();
+                html = `
+                    <div class="algo-section">
+                        <h4>// INSERTION SORT (การเรียงแบบแทรก)</h4>
+                        <div class="stat">
+                            █ จำนวนการเปรียบเทียบ (Compare): <strong>${result.Count_Compare}</strong> ครั้ง<br>
+                            █ จำนวนการสลับ (Swap): <strong>${result.Count_Swap}</strong> ครั้ง
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการเปรียบเทียบ:</strong><br><br>
+                            <span class="compare">${formatArray(result.Compare)}</span>
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการสลับ:</strong><br><br>
+                            <span class="swap">${formatArray(result.Swap)}</span>
+                        </div>
+                        <div class="stat" style="margin-top: 15px; background: #001a00; border-left: 4px solid #ffff00;">
+                            <strong style="color: #ffff00;">✓ สรุป:</strong> ข้อมูลเรียงลำดับแล้ว มีการเปรียบเทียบ ${result.Count_Compare} ครั้ง และสลับ ${result.Count_Swap} ครั้ง
+                        </div>
+                    </div>
+                `;
+            } else if (num === 2) {
+                myData = new MyData([1, 2, 3, 4, 5]);
+                result = myData.bubbleSort();
+                html = `
+                    <div class="algo-section">
+                        <h4>// BUBBLE SORT (การเรียงแบบฟอง)</h4>
+                        <div class="stat">
+                            █ จำนวนการเปรียบเทียบ (Compare): <strong>${result.Count_Compare}</strong> ครั้ง<br>
+                            █ จำนวนการสลับ (Swap): <strong>${result.Count_Swap}</strong> ครั้ง
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการเปรียบเทียบ:</strong><br><br>
+                            <span class="compare">${formatArray(result.Compare)}</span>
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการสลับ:</strong><br><br>
+                            <span class="swap">${formatArray(result.Swap)}</span>
+                        </div>
+                        <div class="stat" style="margin-top: 15px; background: #001a00; border-left: 4px solid #ffff00;">
+                            <strong style="color: #ffff00;">✓ สรุป:</strong> ข้อมูลเรียงลำดับแล้ว มีการเปรียบเทียบ ${result.Count_Compare} ครั้ง และสลับ ${result.Count_Swap} ครั้ง
+                        </div>
+                    </div>
+                `;
+            } else if (num === 3) {
+                myData = new MyData([5, 4, 3, 2, 1]);
+                const selection = myData.selectionSort();
+                const insertion = myData.insertionSort();
+                const bubble = myData.bubbleSort();
+                
+                html = `
+                    <div class="algo-section">
+                        <h4>// SELECTION SORT (การเรียงแบบเลือก)</h4>
+                        <div class="stat">
+                            █ จำนวนการเปรียบเทียบ (Compare): <strong>${selection.Count_Compare}</strong> ครั้ง<br>
+                            █ จำนวนการสลับ (Swap): <strong>${selection.Count_Swap}</strong> ครั้ง
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการเปรียบเทียบ:</strong><br><br>
+                            <span class="compare">${formatArray(selection.Compare)}</span>
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการสลับ:</strong><br><br>
+                            <span class="swap">${formatArray(selection.Swap)}</span>
+                        </div>
+                        <div class="stat" style="margin-top: 15px; background: #001a00; border-left: 4px solid #ffff00;">
+                            <strong style="color: #ffff00;">✓ สรุป:</strong> มีการเปรียบเทียบ ${selection.Count_Compare} ครั้ง และสลับ ${selection.Count_Swap} ครั้ง
+                        </div>
+                    </div>
+
+                    <div class="algo-section">
+                        <h4>// INSERTION SORT (การเรียงแบบแทรก)</h4>
+                        <div class="stat">
+                            █ จำนวนการเปรียบเทียบ (Compare): <strong>${insertion.Count_Compare}</strong> ครั้ง<br>
+                            █ จำนวนการสลับ (Swap): <strong>${insertion.Count_Swap}</strong> ครั้ง
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการเปรียบเทียบ:</strong><br><br>
+                            <span class="compare">${formatArray(insertion.Compare)}</span>
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการสลับ:</strong><br><br>
+                            <span class="swap">${formatArray(insertion.Swap)}</span>
+                        </div>
+                        <div class="stat" style="margin-top: 15px; background: #001a00; border-left: 4px solid #ffff00;">
+                            <strong style="color: #ffff00;">✓ สรุป:</strong> มีการเปรียบเทียบ ${insertion.Count_Compare} ครั้ง และสลับ ${insertion.Count_Swap} ครั้ง
+                        </div>
+                    </div>
+
+                    <div class="algo-section">
+                        <h4>// BUBBLE SORT (การเรียงแบบฟอง)</h4>
+                        <div class="stat">
+                            █ จำนวนการเปรียบเทียบ (Compare): <strong>${bubble.Count_Compare}</strong> ครั้ง<br>
+                            █ จำนวนการสลับ (Swap): <strong>${bubble.Count_Swap}</strong> ครั้ง
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการเปรียบเทียบ:</strong><br><br>
+                            <span class="compare">${formatArray(bubble.Compare)}</span>
+                        </div>
+                        <div class="details">
+                            <strong>▼ รายการสลับ:</strong><br><br>
+                            <span class="swap">${formatArray(bubble.Swap)}</span>
+                        </div>
+                        <div class="stat" style="margin-top: 15px; background: #001a00; border-left: 4px solid #ffff00;">
+                            <strong style="color: #ffff00;">✓ สรุป:</strong> มีการเปรียบเทียบ ${bubble.Count_Compare} ครั้ง และสลับ ${bubble.Count_Swap} ครั้ง
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 20px; background: #001100; border: 3px solid #ffff00; text-align: center; color: #ffff00; font-size: clamp(0.55em, 2vw, 0.75em); line-height: 2;">
+                        <strong style="font-size: 1.3em;">★ การเปรียบเทียบประสิทธิภาพ ★</strong><br><br>
+                        <div style="text-align: left; margin: 15px 0;">
+                        ▶ Selection Sort: ${selection.Count_Compare} เปรียบเทียบ, ${selection.Count_Swap} สลับ<br>
+                        ▶ Insertion Sort: ${insertion.Count_Compare} เปรียบเทียบ, ${insertion.Count_Swap} สลับ<br>
+                        ▶ Bubble Sort: ${bubble.Count_Compare} เปรียบเทียบ, ${bubble.Count_Swap} สลับ<br>
+                        </div>
+                        <div style="margin-top: 15px; color: #00ff00;">
+                        ✓ ข้อมูลที่เรียงจากมากไปน้อย (Worst Case) ทำให้<br>
+                        Insertion และ Bubble Sort ต้องสลับตำแหน่งมาก!
+                        </div>
+                    </div>
+                `;
+            }
+
+            answer.innerHTML = html;
+            answer.classList.add('show');
+        }
+    </script>
+</body>
+</html>
